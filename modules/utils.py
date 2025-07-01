@@ -42,7 +42,10 @@ def build_environment(app_config_item, config_data):
                     value = value.replace(placeholder, config_data.get(field, ''))
             env[env_var] = value
         else:
-            env[env_var] = config_data.get(value, '')
+            if app_config_item['id'] == "earnapp" and env_var == "EARNAPP_UUID":
+                env[env_var] = f"sdk-node-{config_data.get(value, '')}"
+            else:
+                env[env_var] = config_data.get(value, '')
     return env
 
 def get_system_info():
