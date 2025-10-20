@@ -1,61 +1,26 @@
-name: Share2Earn Auto Runner
+name: Run Share2Earn Services
 
 on:
+  # This allows you to start the workflow manually from the Actions tab
   workflow_dispatch:
-  schedule:
-    - cron: "0 */6 * * *"
 
 jobs:
-  run-share2earn:
+  run-services:
     runs-on: ubuntu-latest
-    timeout-minutes: 350
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      - name: Checkout Repository
+        uses: actions/checkout@v3
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.10"
-
-      - name: Install dependencies
-        run: pip install -r requirements.txt
-
-      - name: Restore previous data (if any)
-        uses: actions/download-artifact@v4
-        with:
-          name: share2earn-data
-          path: data/
-        continue-on-error: true
-
-      - name: Generate secure user config
+      - name: Create .env file for Grass
+        # This step securely creates the environment file that docker-compose will use.
+        # It reads the secrets you created in Step 1.
         run: |
-          mkdir -p data
-          cat <<EOF > data/user_config.json
-          {
-              "grass": {
-                "enabled": true,
-                "id": "${{ secrets.GRASS_ID }}"
-              }
-            },
-            "global": {
-              "auto_start_enabled": true,
-              "proxy": ""
-            }
-          }
-          EOF
+          echo "Creating .env file..."
+          echo "EMAIL=${{ secrets.GRASS_EMAIL }}" >> .env
+          echo "PASSWD=${{ secrets.GRASS_PASSWORD }}" >> .env
+          echo "Done."
 
-      - name: Run Share2Earn
-        run: |
-          echo "Starting Share2Earn..."
-          python main.py &
-          sleep 21000
-          echo "Shutting down gracefully..."
-
-      - name: Save session data
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: share2earn-data
-          path: data/
+      - name: Run the Grass Service with Docker Compose
+        # We will only run the 'grass' service for this demo.
+        # This command will run in the foreground until the job is cancelled or times out.
+        run: docker-compose up grass
