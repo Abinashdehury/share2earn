@@ -1,0 +1,61 @@
+name: Share2Earn Auto Runner
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "0 */6 * * *"
+
+jobs:
+  run-share2earn:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Restore previous data (if any)
+        uses: actions/download-artifact@v4
+        with:
+          name: share2earn-data
+          path: data/
+        continue-on-error: true
+
+      - name: Generate secure user config
+        run: |
+          mkdir -p data
+          cat <<EOF > data/user_config.json
+          {
+              "grass": {
+                "enabled": true,
+                "id": "${{ secrets.GRASS_ID }}"
+              }
+            },
+            "global": {
+              "auto_start_enabled": true,
+              "proxy": ""
+            }
+          }
+          EOF
+
+      - name: Run Share2Earn
+        run: |
+          echo "Starting Share2Earn..."
+          python main.py &
+          sleep 21000
+          echo "Shutting down gracefully..."
+
+      - name: Save session data
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: share2earn-data
+          path: data/
