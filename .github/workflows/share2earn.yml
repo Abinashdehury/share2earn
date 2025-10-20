@@ -21,6 +21,6 @@ jobs:
           echo "Done."
 
       - name: Run the Grass Service with Docker Compose
-        # We will only run the 'grass' service for this demo.
-        # This command will run in the foreground until the job is cancelled or times out.
-        run: docker-compose up grass
+        # This is the corrected command. Notice the space instead of the hyphen.
+        # This will run in the foreground until the job is cancelled or times out.
+        run: docker compose up grass
