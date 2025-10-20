@@ -24,6 +24,11 @@ jobs:
           echo "EMAIL=${{ secrets.GRASS_EMAIL }}" >> .env
           echo "PASSWD=${{ secrets.GRASS_PASSWORD }}" >> .env
           echo "Done."
+          
+      - name: Verify Files in Directory
+        # This is our new debugging step.
+        # It will show us all the files in the current folder.
+        run: ls -la
 
       - name: Run the Grass Service with Docker Compose
         # This is the corrected command. Notice the space instead of the hyphen.
